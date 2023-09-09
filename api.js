@@ -1,4 +1,4 @@
-/*
+/** 
 This is a wrapper around fetch that deals with auth tokens, cookies and marshalling and parsing JSON.
 
 To use the token getter, you can do something like this which is using firebase auth:
@@ -11,9 +11,11 @@ apiInit({apiURL: '${d.apiURL}', getToken: () => auth.currentUser.getIdToken()})
 var opts = {}
 var apiURL = ''
 
-// options:
-// * apiURL = '' // set an API prefix so you don't have to pass in the full URL each time
-// * getToken = null // you can set this and the it MUST have a getToken() function that returns a promise. This will be passed in as a Bearer token.
+/**
+ * // options:
+ * @param apiURL = '' // set an API prefix so you don't have to pass in the full URL each time
+ * @param getToken = null // you can set this and the it MUST have a getToken() function that returns a promise. This will be passed in as a Bearer token.
+ */
 export function apiInit(options = {}) {
     opts = options
     apiURL = opts.apiURL || ''
@@ -25,8 +27,10 @@ export function getCookie(name) {
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
+/**
 // api calls the API with all the details. 
 // url is either a full URL or a path that will be appended to the apiURL option
+ */
 export default async function api(url, {
     method = "GET",
     body = {},

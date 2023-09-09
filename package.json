@@ -1,6 +1,7 @@
 {
   "name": "jsutils",
   "version": "0.0.2",
+  "type": "module",
   "description": "Random scripts I use for many projects.",
   "main": "api.js",
   "scripts": {

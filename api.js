@@ -86,7 +86,6 @@ export default async function api(url, {
             let ct = response.headers.get('Content-Type')
             if (ct && ct.includes('application/json')) {
                 let j = await response.json()
-                console.log("JSON ERROR:", j)
                 throw new ApiError(j.error.message, { status: response.status })
             } else {
                 throw new ApiError(await response.text(), { status: response.status })

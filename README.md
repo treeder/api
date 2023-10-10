@@ -1,26 +1,23 @@
-# jsutils
-
-Random scripts I use for many projects. 
-
+# api function - an ehanced fetch
 
 ## Getting started
 
 ### On the server
 
 ```sh
-npm install treeder/jsutils
+npm install treeder/api
 ```
 
 Then import with:
 
 ```js
-import {api, apiInit} from 'jsutils/api.js'
+import { api, apiInit } from 'jsutils/api.js'
 ```
 
 ### On the client
 
 ```js
-import { api, apiInit } from 'https://cdn.jsdelivr.net/gh/treeder/jsutils@0/api.js'
+import { api, apiInit } from 'https://cdn.jsdelivr.net/gh/treeder/api@0/api.js'
 ```
 
 ## Usage

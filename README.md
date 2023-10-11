@@ -20,6 +20,12 @@ import { api, apiInit } from 'jsutils/api.js'
 import { api, apiInit } from 'https://cdn.jsdelivr.net/gh/treeder/api@0/api.js'
 ```
 
+### Configure
+
+```js
+apiInit({ apiURL: apiURL })
+```
+
 ## Usage
 
 Then just use it in place of fetch:

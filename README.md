@@ -1,4 +1,4 @@
-# api function - an ehanced fetch
+# api function - an enhanced fetch
 
 ## Getting started
 

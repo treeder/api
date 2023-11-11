@@ -39,6 +39,7 @@ export default async function api(url, {
         "Content-Type": "application/json"
     },
     sessionCookie = "",
+    raw = false,
 } = {},) {
 
     method = method.toUpperCase()
@@ -90,6 +91,9 @@ export default async function api(url, {
             } else {
                 throw new ApiError(await response.text(), { status: response.status })
             }
+        }
+        if (raw === true) {
+            return response
         }
         return await response.json()
     } catch (e) {

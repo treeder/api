@@ -74,7 +74,11 @@ export class API {
                 if (ct && ct.includes('application/json')) {
                     let j = await response.json()
                     // console.log("j:", j)
-                    throw new APIError(j.error.message, { status: response.status })
+                    if (j.error && j.error.message) {
+                        throw new APIError(j.error.message, { status: response.status })
+                    } else {
+                        throw new APIError(JSON.stringify(j), { status: response.status })
+                    }
                 } else {
                     throw new APIError(await response.text(), { status: response.status })
                 }

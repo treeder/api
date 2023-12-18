@@ -133,3 +133,4 @@ const api = defaultAPI.fetch.bind(defaultAPI)
 const apiURL = defaultAPI.apiURL
 
 export { api, APIError, apiURL }
+export default api

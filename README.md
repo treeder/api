@@ -11,7 +11,7 @@ npm install treeder/api
 Then import with:
 
 ```js
-import { api, apiInit } from 'jsutils/api.js'
+import { api, apiInit } from 'api'
 ```
 
 ### On the client

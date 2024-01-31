@@ -38,7 +38,7 @@ export class API {
                 headers['Authorization'] = `Cookie ${sessionCookie}`
             } else if (this.options.getToken) {
                 let token = await this.options.getToken()
-                headers['Authorization'] = "Bearer " + token
+                if (token) headers['Authorization'] = "Bearer " + token
             } else {
                 if (typeof window !== "undefined") {
                     // running in browser

@@ -97,7 +97,8 @@ export class API {
 
 // default Api instance
 const defaultAPI = new API()
-
+const api = defaultAPI.fetch.bind(defaultAPI)
+let apiURL = defaultAPI.options.apiURL
 
 /**
  * // options:
@@ -106,6 +107,7 @@ const defaultAPI = new API()
  */
 export function apiInit(options = {}) {
     defaultAPI.options = options
+    apiURL = options.apiURL
 }
 
 export function getCookie(name) {
@@ -129,8 +131,6 @@ class APIError extends Error {
     }
 }
 
-const api = defaultAPI.fetch.bind(defaultAPI)
-const apiURL = defaultAPI.apiURL
 
 export { api, APIError, apiURL }
 export default api

@@ -58,7 +58,7 @@ export class API {
             headers: headers
         }
         url = url.startsWith('http') ? url : apiURL + url
-        console.log("calling api:", url)
+        // console.log("calling api:", url)
         if (formData) {
             data.body = formData
             delete headers['Content-Type'] // see https://github.com/github/fetch/issues/505#issuecomment-293064470

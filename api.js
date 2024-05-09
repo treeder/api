@@ -104,10 +104,10 @@ export class API {
             return await this.fetch(url, options)
         }
         let key = url
-        console.log('fetchAndCache', key)
+        // console.log('fetchAndCache', key)
         if (Object.hasOwn(this.cache, key)) {
             let r = await this.cache[key]
-            console.log('in cache', key, r)
+            // console.log('in cache', key, r)
             if (r instanceof Error) {
                 throw r
             }

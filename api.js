@@ -12,12 +12,17 @@ export class API {
 
     constructor(options = {}) {
         this.options = options
+        this.cache = {}
     }
 
     /**
-    // fetch calls the API with all the details. 
-    // url is either a full URL or a path that will be appended to the apiURL option
-     */
+    * fetch calls the API and returns the response. 
+    * It will automatically add the Authorization header if it's not already set.
+    * It will also automatically add the Content-Type header if it's not already set.
+    * And it will stringify and parse JSON.
+    * 
+    * @param url - either a full URL or a path that will be appended to the apiURL option
+    */
     async fetch(url, {
         method = "GET",
         body = {},
@@ -89,6 +94,33 @@ export class API {
             return await response.json()
         } catch (e) {
             // console.log("CAUGHT ERROR:", e)
+            throw e
+        }
+    }
+
+    async fetchAndCache(url, options) {
+        if (options && options.method && options.method.toUpperCase() != 'GET') {
+            // only cache GET requests
+            return await this.fetch(url, options)
+        }
+        let key = url
+        console.log('fetchAndCache', key)
+        if (Object.hasOwn(this.cache, key)) {
+            let r = await this.cache[key]
+            console.log('in cache', key, r)
+            if (r instanceof Error) {
+                throw r
+            }
+            return r
+        }
+        try {
+            let p = this.fetch(url, options)
+            this.cache[key] = p
+            let r = await p
+            return r
+        } catch (e) {
+            // also going to cache exceptions too. They should hopefully be APIError's
+            this.cache[key] = e
             throw e
         }
     }

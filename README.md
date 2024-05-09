@@ -1,5 +1,9 @@
 # api function - an enhanced fetch
 
+This package assumes your using a REST API with JSON requests and responses. And if you are, it will handle
+setting headers for content-type and authorization, serialing and parsing JSON and some other nice tricks
+like caching responses.
+
 ## Getting started
 
 ### On the server
@@ -11,13 +15,13 @@ npm install treeder/api
 Then import with:
 
 ```js
-import { api, apiInit } from 'api'
+import { api, API, apiInit } from 'api'
 ```
 
 ### On the client
 
 ```js
-import { api, apiInit } from 'https://cdn.jsdelivr.net/gh/treeder/api@0/api.js'
+import { api,  API, apiInit } from 'https://cdn.jsdelivr.net/gh/treeder/api@0/api.js'
 ```
 
 ### Configure
@@ -33,6 +37,20 @@ Then just use it in place of fetch:
 ```js
 let r = await api(`/v1/posts`)
 ```
+
+## Caching
+
+Caching can really help reduce network traffic and increase performance 
+depending on your use case. 
+
+To use caching, you have to create an api object:
+
+```js
+let api = new API()
+let r = await api.fetchAndCache('https://somewhere.com/my/stuff')
+```
+
+
 
 ## Authentication
 
@@ -54,6 +72,8 @@ apiInit({ getToken: () => process.env.API_KEY })
 
 If you have different API's you are talking to, you can create new instances:
 
-```
+```js
 const api2 = new API({ apiURL: 'https://somewhere.com', getToken: () => this.options.apiToken })
+// then use it with:
+let r = await api2.fetch('/abc')
 ```

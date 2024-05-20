@@ -151,7 +151,15 @@ export function getCookie(name) {
 class APIError extends Error {
     constructor(message, options = {}) { // matches standard Error and Response
         super(message, options)
-        this.options = options
+        // console.log("OPTIONS TYPE:", typeof options, options instanceof Object, options instanceof Number)
+        if (Number.isInteger(options) || options instanceof Number) {
+            this.options = { status: options }
+        } else if (options instanceof Object) {
+            this.options = options
+        } else {
+            // if it's anything else, it's probably bad
+            throw new Error("Invalid options for APIError:", options)
+        }
     }
 
     get status() {
@@ -162,7 +170,6 @@ class APIError extends Error {
         return `${super.toString()} ${this.options.status && this.options.status > 0 ? this.options.status : ''}`
     }
 }
-
 
 export { api, APIError, apiURL }
 export default api

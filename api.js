@@ -80,10 +80,9 @@ export class API {
                     let j = await response.json()
                     // console.log("j:", j)
                     if (j.error && j.error.message) {
-                        // NOTE: PASS OTHER ERROR PROPERTIES!!!!      
-                        throw new APIError(j.error.message, Object.assign({ status: response.status }, { ...j }))
+                        throw new APIError(j.error.message, { status: response.status, data: j })
                     } else {
-                        throw new APIError(JSON.stringify(j), { status: response.status })
+                        throw new APIError(JSON.stringify(j), { status: response.status, data: j })
                     }
                 } else {
                     throw new APIError(await response.text(), { status: response.status })
@@ -165,6 +164,9 @@ class APIError extends Error {
 
     get status() {
         return this.options.status
+    }
+    get data() {
+        return this.options.data
     }
 
     toString() {

@@ -80,9 +80,9 @@ export class API {
                     let j = await response.json()
                     // console.log("j:", j)
                     if (j.error && j.error.message) {
-                        throw new APIError(j.error.message, { status: response.status, data: j, cause: j.error })
+                        throw new APIError(j.error.message, { status: response.status, data: j, cause: j.error, headers: response.headers })
                     } else {
-                        throw new APIError(JSON.stringify(j), { status: response.status, data: j })
+                        throw new APIError(JSON.stringify(j), { status: response.status, data: j, headers: response.headers })
                     }
                 } else {
                     throw new APIError(await response.text(), { status: response.status })
@@ -143,9 +143,9 @@ export function apiInit(options = {}) {
 }
 
 export function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2) return parts.pop().split(';').shift()
 }
 
 class APIError extends Error {
@@ -168,9 +168,12 @@ class APIError extends Error {
     get data() {
         return this.options.data
     }
+    get headers() {
+        return this.options.headers
+    }
 
     toString() {
-        return super.toString()
+        return `${super.toString()} ${this.options.status && this.options.status > 0 ? this.options.status : ''}`
     }
 }
 

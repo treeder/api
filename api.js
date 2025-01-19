@@ -173,7 +173,7 @@ class APIError extends Error {
     }
 
     toString() {
-        return `${super.toString()} ${this.options.status && this.options.status > 0 ? this.options.status : ''}`
+        return super.toString()
     }
 }
 

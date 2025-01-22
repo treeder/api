@@ -68,7 +68,7 @@ export class API {
             data.body = formData
             delete headers['Content-Type'] // see https://github.com/github/fetch/issues/505#issuecomment-293064470
         } else if (!(method === 'GET' || method === 'HEAD')) {
-             if (data.body) {
+            if (body) {
                 data.body = JSON.stringify(body)
             }
         }

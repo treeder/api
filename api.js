@@ -68,7 +68,9 @@ export class API {
             data.body = formData
             delete headers['Content-Type'] // see https://github.com/github/fetch/issues/505#issuecomment-293064470
         } else if (!(method === 'GET' || method === 'HEAD')) {
-            data.body = JSON.stringify(body)
+             if (data.body) {
+                data.body = JSON.stringify(body)
+            }
         }
         try {
             let response = await fetch(url, data)

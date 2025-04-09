@@ -33,3 +33,15 @@ jobs:
                 }
               }`)
             console.log("r:", r)
+            if(!(r.user?.sponsorshipForViewerAsSponsorable)){
+              // then this is s sponsor! 
+              // todo: Send a think you note
+            } else {
+              const commentBody = `Thanks for the issue, @${issueCreator}!\n\nPlease consider supporting the project by becoming a sponsor: [GitHub Sponsors](https://github.com/sponsors/${owner}).\n\nSponsor issues get prioritized. If you get paid $100 per hour and this fix will save you an hour or more, then a $10 per month subscription for 10+ months will pay for itself.`
+              github.rest.issues.createComment({
+                issue_number: c.issue.number,
+                owner: c.repo.owner,
+                repo: c.repo.repo,
+                body: '👋 Thanks for reporting!'
+              })
+            }

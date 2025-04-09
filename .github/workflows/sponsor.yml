@@ -2,7 +2,7 @@ name: Comment on Non-Sponsor Issue
 
 on:
   issues:
-    types: [created]
+    types: [opened]
 
 jobs:
   comment:

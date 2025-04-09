@@ -20,6 +20,10 @@ jobs:
             const issueCreator = context.payload.sender.login
             const owner = c.repo.owner 
             const repo = c.repo.repo
+            if(owner == issueCreator){
+              console.log("owner is issue creator")
+              return
+            }
 
             const r = await github.graphql(`
               query {

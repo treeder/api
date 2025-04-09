@@ -14,9 +14,10 @@ jobs:
           # github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             console.log(context)
+            console.log("issue", context.issue, context.payload.issue)
             let c = context
             const issueNumber = c.issue.number
-            const issueCreator = c.issue.user.login
+            const issueCreator = context.payload.sender.login
             const owner = c.repo.owner 
             const repo = c.repo.repo
 

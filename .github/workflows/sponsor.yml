@@ -1,0 +1,55 @@
+name: Comment on Non-Sponsor Issue
+
+on:
+  issues:
+    types: [created]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Sponsor Status and Comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = ${{ github.event.issue.number }}
+            const issueCreator = ${{ github.event.issue.user.login }}
+            const owner = ${{ github.repository_owner.login }}
+            const repo = ${{ github.repository.name }}
+
+            const isSponsor = await github.graphql({
+              query: `
+                query ($login: String!, $owner: String!, $repo: String!) {
+                  user(login: $login) {
+                    sponsorships(repository: {owner: {login: $owner}, name: $repo}) {
+                      edges {
+                        node {
+                          tier {
+                            name
+                          }
+                          status
+                        }
+                      }
+                    }
+                  }
+                }
+              `,
+              variables: {
+                login: issueCreator,
+                owner: owner,
+                repo: repo
+              }
+            })
+
+            if (isSponsor.user.sponsorships.edges.length > 0 && isSponsor.user.sponsorships.edges[0].node.status == 'ACTIVE') {
+              console.log("Sponsor found, skipping comment.")
+            } else {
+              const commentBody = `Thanks for the issue, @${issueCreator}!\n\nPlease consider supporting the project by becoming a sponsor: [GitHub Sponsors](https://github.com/sponsors/${owner}).\n\nSponsor issues get prioritized. If you get paid $100 per hour and this fix will save you at least an hour, then a $10 per month subscription for 10 months will pay for itself.
+              await github.issues.createComment({
+                owner: owner,
+                repo: repo,
+                issue_number: issueNumber,
+                body: commentBody,
+              })
+            }

@@ -11,12 +11,14 @@ jobs:
       - name: Check Sponsor Status and Comment
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issueNumber = ${{ github.event.issue.number }}
-            const issueCreator = ${{ github.event.issue.user.login }}
-            const owner = ${{ github.repository_owner.login }}
-            const repo = ${{ github.repository.name }}
+            console.log(context)
+            let c = context
+            const issueNumber = c.issue.number
+            const issueCreator = c.issue.user.login
+            const owner = c.repo.owner 
+            const repo = c.repo.repo
 
             const isSponsor = await github.graphql({
               query: `
@@ -50,6 +52,12 @@ jobs:
                 owner: owner,
                 repo: repo,
                 issue_number: issueNumber,
+                body: commentBody,
+              })
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
                 body: commentBody,
               })
             }

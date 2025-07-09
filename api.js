@@ -36,6 +36,10 @@ export class API {
 
     method = method.toUpperCase()
 
+    if (!headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json"
+    }
+
     if (!headers['Authorization']) {
       // Cookie notes: cookies aren't passed in fetch by default: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
       // So we're doing some different various things here: explicity -> getToken() function -> 'session' cookie

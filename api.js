@@ -10,6 +10,11 @@ apiInit({apiURL: '${d.apiURL}', getToken: () => auth.currentUser.getIdToken()})
 
 export class API {
 
+  /**
+   * @param {*} options 
+   * @param {string} options.apiURL - The base URL for the API
+   * @param {function} options.headers - Header fields that you want to add to every request, like Authorization
+   */
   constructor(options = {}) {
     this.options = options
     this.cache = {}
@@ -43,9 +48,13 @@ export class API {
     if (!headers['Authorization']) {
       // Cookie notes: cookies aren't passed in fetch by default: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
       // So we're doing some different various things here: explicity -> getToken() function -> 'session' cookie
-      if (sessionCookie && sessionCookie !== '') {
+      if (this.options.headers) {
+        // if the options have headers, we assume they are already set
+        headers = { ...this.options.headers, ...headers }
+      }
+      if (sessionCookie && sessionCookie !== '') { // deprecated, should just pass in headers
         headers['Authorization'] = `Cookie ${sessionCookie}`
-      } else if (this.options.getToken) {
+      } else if (this.options.getToken) { // deprecated, use constructor headers
         let token = await this.options.getToken()
         if (token) headers['Authorization'] = "Bearer " + token
       } else {

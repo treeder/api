@@ -1,17 +1,10 @@
-/** 
+/**
 This is a wrapper around fetch that deals with auth tokens, cookies and marshalling and parsing JSON.
-
-To use the token getter, you can do something like this which is using firebase auth:
-
-```js
-apiInit({apiURL: '${d.apiURL}', getToken: () => auth.currentUser.getIdToken()})
-```
 */
-
 export class API {
 
   /**
-   * @param {*} options 
+   * @param {*} options
    * @param {string} options.apiURL - The base URL for the API
    * @param {function} options.headers - Header fields that you want to add to every request, like Authorization
    */
@@ -21,23 +14,27 @@ export class API {
   }
 
   /**
-  * fetch calls the API and returns the response. 
+  * fetch calls the API and returns the response.
   * It will automatically add the Authorization header if it's not already set.
   * It will also automatically add the Content-Type header if it's not already set.
   * And it will stringify and parse JSON.
-  * 
+  *
   * @param url - either a full URL or a path that will be appended to the apiURL option
   */
-  async fetch(url, {
-    method = "GET",
-    body = {},
-    formData = null,
-    headers = {
-      "Content-Type": "application/json"
-    },
-    sessionCookie = "",
-    raw = false,
-  } = {},) {
+  async fetch(url, options = {}) {
+
+    let {
+      method = "GET",
+      body = {},
+      formData = null,
+      headers = {
+        "Content-Type": "application/json"
+      },
+      sessionCookie = "",
+      raw = false,
+    } = options
+
+    // console.log("options:", options)
 
     method = method.toUpperCase()
 
@@ -114,7 +111,9 @@ export class API {
       if (raw === true) {
         return response
       }
-      return await response.json()
+      let ob = await response.json()
+      this.parseProperties(ob, options.model)
+      return ob
     } catch (e) {
       // console.log("CAUGHT ERROR:", e)
       throw e
@@ -146,6 +145,67 @@ export class API {
       this.cache[key] = e
       throw e
     }
+  }
+
+  parseProperties(ob, clz) {
+    if (!ob) return
+    if (!clz) return // || !clz.properties
+    // console.log('ob:',ob, 'clz:', clz)
+    if (clz.properties) {
+      for (const propName in clz.properties) {
+        let val = ob[propName]
+        // console.log("prop:", propName, val)
+        if (!val) continue
+        let prop = clz.properties[propName]
+        ob[propName] = this.parseProp(val, prop)
+      }
+    } else {
+      // see if the model is wrapped:
+      for (const propName in clz) {
+        let val = ob[propName]
+        // console.log("wrap prop:", propName, val)
+        if (!val) continue
+        let prop = clz[propName]
+        this.parseProperties(val, prop)
+      }
+    }
+  }
+
+  parseProp(val, prop, sub = false) {
+    // console.log("val:", val)
+    if (!val || !prop) return val
+    if (prop.parse) {
+      // custom parse function
+      return prop.parse(val)
+    }
+    switch (prop.type) {
+      case Number:
+        return new Number(val)
+      case Boolean:
+        return val == 1
+      case Date:
+        return new Date(val)
+      case BigInt:
+        return BigInt(val)
+    }
+    if (!sub) {
+      // then parse JSON objects
+      switch (prop.type) {
+        case Object:
+          let v = val
+          // check if there are any sub fields we need to parse
+          for (const subProp in prop) {
+            // console.log("subProp:",subProp)
+            // console.log(v)
+            v[subProp] = this.parseProp(v[subProp], prop[subProp], true)
+            // console.log('after:', v)
+          }
+          return v
+        default:
+          return val
+      }
+    }
+
   }
 
 }

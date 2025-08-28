@@ -1,3 +1,4 @@
+import { parseModel } from 'models'
 /**
 This is a wrapper around fetch that deals with auth tokens, cookies and marshalling and parsing JSON.
 */
@@ -112,7 +113,7 @@ export class API {
         return response
       }
       let ob = await response.json()
-      this.parseProperties(ob, options.model)
+      parseModel(ob, options.model)
       return ob
     } catch (e) {
       // console.log("CAUGHT ERROR:", e)
@@ -147,66 +148,6 @@ export class API {
     }
   }
 
-  parseProperties(ob, clz) {
-    if (!ob) return
-    if (!clz) return // || !clz.properties
-    // console.log('ob:',ob, 'clz:', clz)
-    if (clz.properties) {
-      for (const propName in clz.properties) {
-        let val = ob[propName]
-        // console.log("prop:", propName, val)
-        if (!val) continue
-        let prop = clz.properties[propName]
-        ob[propName] = this.parseProp(val, prop)
-      }
-    } else {
-      // see if the model is wrapped:
-      for (const propName in clz) {
-        let val = ob[propName]
-        // console.log("wrap prop:", propName, val)
-        if (!val) continue
-        let prop = clz[propName]
-        this.parseProperties(val, prop)
-      }
-    }
-  }
-
-  parseProp(val, prop, sub = false) {
-    // console.log("val:", val)
-    if (!val || !prop) return val
-    if (prop.parse) {
-      // custom parse function
-      return prop.parse(val)
-    }
-    switch (prop.type) {
-      case Number:
-        return new Number(val)
-      case Boolean:
-        return val == 1
-      case Date:
-        return new Date(val)
-      case BigInt:
-        return BigInt(val)
-    }
-    if (!sub) {
-      // then parse JSON objects
-      switch (prop.type) {
-        case Object:
-          let v = val
-          // check if there are any sub fields we need to parse
-          for (const subProp in prop) {
-            // console.log("subProp:",subProp)
-            // console.log(v)
-            v[subProp] = this.parseProp(v[subProp], prop[subProp], true)
-            // console.log('after:', v)
-          }
-          return v
-        default:
-          return val
-      }
-    }
-
-  }
 
 }
 
@@ -241,7 +182,7 @@ class APIError extends Error {
       this.options = options
     } else {
       // if it's anything else, it's probably bad
-      throw new Error("Invalid options for APIError:", options)
+      throw new Error("Invalid options for APIError")
     }
   }
 

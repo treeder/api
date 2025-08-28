@@ -1,12 +1,15 @@
 {
   "name": "api",
-  "version": "0.2.25",
+  "version": "1.0.0",
   "type": "module",
-  "description": "Fetch me some sugar",
+  "description": "Like fetch, but better. Parses JSON, stringifies and handles errors.",
   "main": "api.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "models": "github:treeder/models"
+  }
 }

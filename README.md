@@ -21,7 +21,7 @@ import { api, API, apiInit } from 'api'
 ### On the client
 
 ```js
-import { api,  API, apiInit } from 'https://cdn.jsdelivr.net/gh/treeder/api@0/api.js'
+import { api, API, apiInit } from 'https://cdn.jsdelivr.net/gh/treeder/api@1/api.js'
 ```
 
 ### Configure
@@ -40,8 +40,8 @@ let r = await api(`/v1/posts`)
 
 ## Caching
 
-Caching can really help reduce network traffic and increase performance 
-depending on your use case. 
+Caching can really help reduce network traffic and increase performance
+depending on your use case.
 
 To use caching, you have to create an api object:
 
@@ -50,22 +50,14 @@ let api = new API()
 let r = await api.fetchAndCache('https://somewhere.com/my/stuff')
 ```
 
-
-
 ## Authentication
 
-To add an `Authorization` header, specify a getToken() function. 
+To add an `Authorization` header, specify a getToken() function.
 
-This is an example you can use on the browser side if you are using Firebase Auth. 
-
-```js
-apiInit({ getToken: () => auth.currentUser.getIdToken() })
-```
-
-On the server, you do the same thing, but your token probably comes from an env var:
+This is an example you can use on the browser side if you are using Firebase Auth.
 
 ```js
-apiInit({ getToken: () => process.env.API_KEY })
+apiInit({ headers: { Authorization: `apiKey ${process.env.API_KEY}` } })
 ```
 
 ## Multiple APIs
@@ -73,7 +65,17 @@ apiInit({ getToken: () => process.env.API_KEY })
 If you have different API's you are talking to, you can create new instances:
 
 ```js
-const api2 = new API({ apiURL: 'https://somewhere.com', getToken: () => this.options.apiToken })
+const api2 = new API({ apiURL: 'https://somewhere.com' })
 // then use it with:
 let r = await api2.fetch('/abc')
+```
+
+## Errors
+
+Any errors will throw an `APIError` which has a `status` field on it to check the code.
+
+This is exported too so you can use it in your API's to return nice errors.
+
+```js
+return Response.json(new APIError('something went wrong', { status: 400 }))
 ```

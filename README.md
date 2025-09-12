@@ -25,7 +25,7 @@ import { api, API, apiInit } from 'https://cdn.jsdelivr.net/gh/treeder/api@1/api
 ```
 
 - api is a generic API instance, ready to use just by calling `api(url, opts)` instead of `fetch(url, opts)`
-- API is a class letting you instantiate and customize. 
+- API is a class letting you instantiate and customize.
 - apiInit lets you customize the default API instance.
 
 ## Usage
@@ -77,7 +77,7 @@ Any errors will throw an `APIError` which has a `status` field on it to check th
 try {
   let r = await api('https://x.com/abc')
 } catch (e) {
-  return Response.json({ message: e.message }, { status: e.status })
+  return Response.json({ error: e }, { status: e.status })
 }
 ```
 
@@ -88,7 +88,7 @@ This is exported too so you can use it in your API's to return nice errors.
 Caching can really help reduce network traffic and increase performance
 depending on your use case. This will only cache GET requests.
 
-To use caching, you have to create an api object and use `fetchAndCache`. 
+To use caching, you have to create an api object and use `fetchAndCache`.
 
 ```js
 let api = new API()

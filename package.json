@@ -9,12 +9,14 @@
   },
   "author": "",
   "license": "MIT",
-  "dependencies": {},
   "prettier": {
     "tabWidth": 2,
     "singleQuote": true,
     "printWidth": 120,
     "semi": false,
     "trailingComma": "all"
+  },
+  "devDependencies": {
+    "testkit": "github:treeder/testkit"
   }
 }

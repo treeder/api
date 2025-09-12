@@ -73,11 +73,15 @@ let r = await api2.fetch('/abc')
 
 Any errors will throw an `APIError` which has a `status` field on it to check the code.
 
-This is exported too so you can use it in your API's to return nice errors.
-
 ```js
-return Response.json(new APIError('something went wrong', { status: 400 }))
+try {
+  let r = await api('https://x.com/abc')
+} catch (e) {
+  return Response.json({ message: e.message }, { status: e.status })
+}
 ```
+
+This is exported too so you can use it in your API's to return nice errors.
 
 ## Caching
 

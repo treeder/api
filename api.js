@@ -193,6 +193,13 @@ class APIError extends Error {
   toString() {
     return super.toString()
   }
+
+  toJSON() {
+    return {
+      message: this.message,
+      // todo: return status too?
+    }
+  }
 }
 
 export { api, APIError, apiURL }

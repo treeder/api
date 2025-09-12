@@ -12,49 +12,48 @@ like caching responses.
 npm install treeder/api
 ```
 
-Then import with:
+Then import:
 
 ```js
 import { api, API, apiInit } from 'api'
 ```
 
-### On the client
+### In the browser
 
 ```js
 import { api, API, apiInit } from 'https://cdn.jsdelivr.net/gh/treeder/api@1/api.js'
 ```
 
-### Configure
-
-```js
-apiInit({ apiURL: apiURL })
-```
+- api is a generic API instance, ready to use just by calling `api(url, opts)` instead of `fetch(url, opts)`
+- API is a class letting you instantiate and customize. 
+- apiInit lets you customize the default API instance.
 
 ## Usage
 
 Then just use it in place of fetch:
 
 ```js
-let r = await api(`/v1/posts`)
+let r = await api(`/v1/users`)
 ```
 
-## Caching
-
-Caching can really help reduce network traffic and increase performance
-depending on your use case.
-
-To use caching, you have to create an api object:
+Use with [models](https://github.com/treeder/models) package to get even better JSON parsing capabilities
 
 ```js
-let api = new API()
-let r = await api.fetchAndCache('https://somewhere.com/my/stuff')
+let r = await api(`/v1/user/123`)
+let user = parseModel(r.user, User)
 ```
 
-## Authentication
+## Configure default instance
 
-To add an `Authorization` header, specify a getToken() function.
+```js
+apiInit({ apiURL: apiURL })
+```
 
-This is an example you can use on the browser side if you are using Firebase Auth.
+- apiURL will be prefixed to any calls.
+
+### Authentication
+
+Add headers to the API instance that will be used for all subsequent calls.
 
 ```js
 apiInit({ headers: { Authorization: `apiKey ${process.env.API_KEY}` } })
@@ -78,4 +77,16 @@ This is exported too so you can use it in your API's to return nice errors.
 
 ```js
 return Response.json(new APIError('something went wrong', { status: 400 }))
+```
+
+## Caching
+
+Caching can really help reduce network traffic and increase performance
+depending on your use case. This will only cache GET requests.
+
+To use caching, you have to create an api object and use `fetchAndCache`. 
+
+```js
+let api = new API()
+let r = await api.fetchAndCache('https://somewhere.com/my/stuff')
 ```

@@ -9,7 +9,12 @@
   },
   "author": "",
   "license": "MIT",
-  "dependencies": {
-    "models": "github:treeder/models"
+  "dependencies": {},
+  "prettier": {
+    "tabWidth": 2,
+    "singleQuote": true,
+    "printWidth": 120,
+    "semi": false,
+    "trailingComma": "all"
   }
 }

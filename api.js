@@ -1,9 +1,7 @@
-import { parseModel } from 'models'
 /**
 This is a wrapper around fetch that deals with auth tokens, cookies and marshalling and parsing JSON.
 */
 export class API {
-
   /**
    * @param {*} options
    * @param {string} options.apiURL - The base URL for the API
@@ -15,23 +13,22 @@ export class API {
   }
 
   /**
-  * fetch calls the API and returns the response.
-  * It will automatically add the Authorization header if it's not already set.
-  * It will also automatically add the Content-Type header if it's not already set.
-  * And it will stringify and parse JSON.
-  *
-  * @param url - either a full URL or a path that will be appended to the apiURL option
-  */
+   * fetch calls the API and returns the response.
+   * It will automatically add the Authorization header if it's not already set.
+   * It will also automatically add the Content-Type header if it's not already set.
+   * And it will stringify and parse JSON.
+   *
+   * @param url - either a full URL or a path that will be appended to the apiURL option
+   */
   async fetch(url, options = {}) {
-
     let {
-      method = "GET",
+      method = 'GET',
       body = {},
       formData = null,
       headers = {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json',
       },
-      sessionCookie = "",
+      sessionCookie = '',
       raw = false,
     } = options
 
@@ -39,8 +36,8 @@ export class API {
 
     method = method.toUpperCase()
 
-    if (!headers["Content-Type"]) {
-      headers["Content-Type"] = "application/json"
+    if (!headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json'
     }
 
     if (!headers['Authorization']) {
@@ -50,13 +47,15 @@ export class API {
         // if the options have headers, we assume they are already set
         headers = { ...this.options.headers, ...headers }
       }
-      if (sessionCookie && sessionCookie !== '') { // deprecated, should just pass in headers
+      if (sessionCookie && sessionCookie !== '') {
+        // deprecated, should just pass in headers
         headers['Authorization'] = `Cookie ${sessionCookie}`
-      } else if (this.options.getToken) { // deprecated, use constructor headers
+      } else if (this.options.getToken) {
+        // deprecated, use constructor headers
         let token = await this.options.getToken()
-        if (token) headers['Authorization'] = "Bearer " + token
+        if (token) headers['Authorization'] = 'Bearer ' + token
       } else {
-        if (typeof window !== "undefined") {
+        if (typeof window !== 'undefined') {
           // running in browser
           let c = getCookie('session') || getCookie('session')
           if (c) {
@@ -71,7 +70,7 @@ export class API {
     let apiURL = this.options.apiURL || ''
     let data = {
       method: method,
-      headers: headers
+      headers: headers,
     }
     url = url.startsWith('http') ? url : apiURL + url
     // console.log("calling api:", url)
@@ -113,7 +112,6 @@ export class API {
         return response
       }
       let ob = await response.json()
-      parseModel(ob, options.model)
       return ob
     } catch (e) {
       // console.log("CAUGHT ERROR:", e)
@@ -147,8 +145,6 @@ export class API {
       throw e
     }
   }
-
-
 }
 
 // default Api instance
@@ -157,10 +153,10 @@ const api = defaultAPI.fetch.bind(defaultAPI)
 let apiURL = defaultAPI.options.apiURL
 
 /**
-* // options:
-* @param apiURL = '' // set an API prefix so you don't have to pass in the full URL each time
-* @param getToken = null // you can set this and the it MUST have a getToken() function that returns a promise. This will be passed in as a Bearer token.
-*/
+ * // options:
+ * @param apiURL = '' // set an API prefix so you don't have to pass in the full URL each time
+ * @param getToken = null // you can set this and the it MUST have a getToken() function that returns a promise. This will be passed in as a Bearer token.
+ */
 export function apiInit(options = {}) {
   defaultAPI.options = options
   apiURL = options.apiURL
@@ -173,7 +169,8 @@ export function getCookie(name) {
 }
 
 class APIError extends Error {
-  constructor(message, options = {}) { // matches standard Error and Response
+  constructor(message, options = {}) {
+    // matches standard Error and Response
     super(message, options)
     // console.log("OPTIONS TYPE:", typeof options, options instanceof Object, options instanceof Number)
     if (Number.isInteger(options) || options instanceof Number) {
@@ -182,7 +179,7 @@ class APIError extends Error {
       this.options = options
     } else {
       // if it's anything else, it's probably bad
-      throw new Error("Invalid options for APIError")
+      throw new Error('Invalid options for APIError')
     }
   }
 

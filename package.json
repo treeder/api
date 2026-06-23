@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "type": "module",
   "description": "Like fetch, but better. Parses JSON, stringifies and handles errors.",
   "main": "api.js",

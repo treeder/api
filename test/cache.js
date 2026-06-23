@@ -138,6 +138,20 @@ export async function testCache(c) {
       assert(fetchCount === 1) // Should only fetch once!
     }
 
+    // 5. Test prototype/property collision safety (e.g. key 'toString')
+    {
+      fetchCount = 0
+      const api = new API()
+      
+      let res1 = await api.fetchAndCache('toString')
+      assert(res1.count === 1)
+      assert(fetchCount === 1)
+
+      let res2 = await api.fetchAndCache('toString')
+      assert(res2.count === 1)
+      assert(fetchCount === 1)
+    }
+
   } finally {
     // Restore original fetch
     globalThis.fetch = originalFetch

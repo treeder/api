@@ -10,7 +10,7 @@ export class API {
   constructor(options = {}) {
     this.options = options
     this.cache = options.cache || new Map()
-    this.inFlight = {}
+    this.inFlight = new Map()
   }
 
   /**
@@ -128,8 +128,8 @@ export class API {
     let key = url
     // console.log('fetchAndCache', key)
 
-    if (this.inFlight[key]) {
-      let r = await this.inFlight[key]
+    if (this.inFlight.has(key)) {
+      let r = await this.inFlight.get(key)
       if (r instanceof Error) {
         throw r
       }
@@ -154,7 +154,7 @@ export class API {
       }
     })()
 
-    this.inFlight[key] = p
+    this.inFlight.set(key, p)
 
     try {
       let r = await p
@@ -163,7 +163,7 @@ export class API {
       }
       return r
     } finally {
-      delete this.inFlight[key]
+      this.inFlight.delete(key)
     }
   }
 }

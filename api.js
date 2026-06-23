@@ -9,7 +9,8 @@ export class API {
    */
   constructor(options = {}) {
     this.options = options
-    this.cache = {}
+    this.cache = options.cache || new Map()
+    this.inFlight = {}
   }
 
   /**
@@ -126,23 +127,62 @@ export class API {
     }
     let key = url
     // console.log('fetchAndCache', key)
-    if (Object.hasOwn(this.cache, key)) {
-      let r = await this.cache[key]
-      // console.log('in cache', key, r)
+
+    if (this.inFlight[key]) {
+      let r = await this.inFlight[key]
       if (r instanceof Error) {
         throw r
       }
       return r
     }
+
+    const hasMethods = typeof this.cache.get === 'function' && typeof this.cache.set === 'function'
+
+    let p = (async () => {
+      if (hasMethods) {
+        let cached = await this.cache.get(key)
+        if (cached !== undefined && cached !== null) {
+          return cached
+        }
+      } else {
+        if (Object.hasOwn(this.cache, key)) {
+          return this.cache[key]
+        }
+      }
+
+      let fetchPromise = this.fetch(url, options)
+      if (!hasMethods) {
+        this.cache[key] = fetchPromise
+      }
+
+      try {
+        let r = await fetchPromise
+        if (hasMethods) {
+          await this.cache.set(key, r)
+        } else {
+          this.cache[key] = r
+        }
+        return r
+      } catch (e) {
+        if (hasMethods) {
+          await this.cache.set(key, e)
+        } else {
+          this.cache[key] = e
+        }
+        throw e
+      }
+    })()
+
+    this.inFlight[key] = p
+
     try {
-      let p = this.fetch(url, options)
-      this.cache[key] = p
       let r = await p
+      if (r instanceof Error) {
+        throw r
+      }
       return r
-    } catch (e) {
-      // also going to cache exceptions too. They should hopefully be APIError's
-      this.cache[key] = e
-      throw e
+    } finally {
+      delete this.inFlight[key]
     }
   }
 }
@@ -160,6 +200,9 @@ let apiURL = defaultAPI.options.apiURL
 export function apiInit(options = {}) {
   defaultAPI.options = options
   apiURL = options.apiURL
+  if (options.cache) {
+    defaultAPI.cache = options.cache
+  }
 }
 
 export function getCookie(name) {

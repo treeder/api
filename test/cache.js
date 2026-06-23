@@ -206,6 +206,45 @@ export async function testCache(c) {
       assert(fetchCount === 2)
     }
 
+    // 7. Test errorTTL (expiry of cached errors)
+    {
+      fetchCount = 0
+      const api = new API()
+
+      // First call fails, we set a short 1 second TTL
+      let errorThrown = false
+      try {
+        await api.fetchAndCache('https://example.com/api/fail', { errorTTL: 1 })
+      } catch (e) {
+        errorThrown = true
+      }
+      assert(errorThrown === true)
+      assert(fetchCount === 1)
+
+      // Second call (within TTL) should throw immediately without refetching
+      errorThrown = false
+      try {
+        await api.fetchAndCache('https://example.com/api/fail')
+      } catch (e) {
+        errorThrown = true
+      }
+      assert(errorThrown === true)
+      assert(fetchCount === 1)
+
+      // Wait 1.1 seconds for error TTL to expire
+      await new Promise(resolve => setTimeout(resolve, 1100))
+
+      // Third call should attempt to fetch again (since cached error expired)
+      errorThrown = false
+      try {
+        await api.fetchAndCache('https://example.com/api/fail')
+      } catch (e) {
+        errorThrown = true
+      }
+      assert(errorThrown === true)
+      assert(fetchCount === 2)
+    }
+
   } finally {
     // Restore original fetch
     globalThis.fetch = originalFetch

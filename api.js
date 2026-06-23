@@ -141,18 +141,24 @@ export class API {
       if (cached !== undefined && cached !== null) {
         if (cached && typeof cached === 'object' && ('value' in cached || 'error' in cached)) {
           if ('error' in cached) {
-            let errObj = cached.error
-            let e = new APIError(errObj.message, { status: errObj.status, data: errObj.data })
-            if (errObj.name) e.name = errObj.name
-            if (errObj.stack) e.stack = errObj.stack
-            throw e
+            if (cached.expiresAt && Date.now() > cached.expiresAt) {
+              await this.cache.delete(key)
+              // fall through to fetch again
+            } else {
+              let errObj = cached.error
+              let e = new APIError(errObj.message, { status: errObj.status, data: errObj.data })
+              if (errObj.name) e.name = errObj.name
+              if (errObj.stack) e.stack = errObj.stack
+              throw e
+            }
+          } else {
+            return cached.value
           }
-          return cached.value
-        }
-        if (cached instanceof Error) {
+        } else if (cached instanceof Error) {
           throw cached
+        } else {
+          return cached
         }
-        return cached
       }
 
       let fetchPromise = this.fetch(url, options)
@@ -162,14 +168,17 @@ export class API {
         await this.cache.set(key, { value: r })
         return r
       } catch (e) {
-        let errObj = {
-          message: e.message,
-          status: e.status,
-          data: e.data,
-          name: e.name,
-          stack: e.stack
+        let errorTTL = (options && options.errorTTL !== undefined) ? options.errorTTL : (this.options.errorTTL !== undefined ? this.options.errorTTL : 10)
+        if (errorTTL > 0) {
+          let errObj = {
+            message: e.message,
+            status: e.status,
+            data: e.data,
+            name: e.name,
+            stack: e.stack
+          }
+          await this.cache.set(key, { error: errObj, expiresAt: Date.now() + errorTTL * 1000 })
         }
-        await this.cache.set(key, { error: errObj })
         throw e
       }
     })()

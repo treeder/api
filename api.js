@@ -136,39 +136,20 @@ export class API {
       return r
     }
 
-    const hasMethods = typeof this.cache.get === 'function' && typeof this.cache.set === 'function'
-
     let p = (async () => {
-      if (hasMethods) {
-        let cached = await this.cache.get(key)
-        if (cached !== undefined) {
-          return cached
-        }
-      } else {
-        if (Object.hasOwn(this.cache, key)) {
-          return this.cache[key]
-        }
+      let cached = await this.cache.get(key)
+      if (cached !== undefined) {
+        return cached
       }
 
       let fetchPromise = this.fetch(url, options)
-      if (!hasMethods) {
-        this.cache[key] = fetchPromise
-      }
 
       try {
         let r = await fetchPromise
-        if (hasMethods) {
-          await this.cache.set(key, r)
-        } else {
-          this.cache[key] = r
-        }
+        await this.cache.set(key, r)
         return r
       } catch (e) {
-        if (hasMethods) {
-          await this.cache.set(key, e)
-        } else {
-          this.cache[key] = e
-        }
+        await this.cache.set(key, e)
         throw e
       }
     })()

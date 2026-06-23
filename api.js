@@ -138,7 +138,20 @@ export class API {
 
     let p = (async () => {
       let cached = await this.cache.get(key)
-      if (cached !== undefined) {
+      if (cached !== undefined && cached !== null) {
+        if (cached && typeof cached === 'object' && ('value' in cached || 'error' in cached)) {
+          if ('error' in cached) {
+            let errObj = cached.error
+            let e = new APIError(errObj.message, { status: errObj.status, data: errObj.data })
+            if (errObj.name) e.name = errObj.name
+            if (errObj.stack) e.stack = errObj.stack
+            throw e
+          }
+          return cached.value
+        }
+        if (cached instanceof Error) {
+          throw cached
+        }
         return cached
       }
 
@@ -146,10 +159,17 @@ export class API {
 
       try {
         let r = await fetchPromise
-        await this.cache.set(key, r)
+        await this.cache.set(key, { value: r })
         return r
       } catch (e) {
-        await this.cache.set(key, e)
+        let errObj = {
+          message: e.message,
+          status: e.status,
+          data: e.data,
+          name: e.name,
+          stack: e.stack
+        }
+        await this.cache.set(key, { error: errObj })
         throw e
       }
     })()

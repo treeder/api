@@ -152,6 +152,60 @@ export async function testCache(c) {
       assert(fetchCount === 1)
     }
 
+    // 6. Test persistent custom cache (JSON serialization / deserialization)
+    {
+      fetchCount = 0
+      const store = new Map()
+      const persistentCache = {
+        get: async (key) => {
+          let val = store.get(key)
+          return val !== undefined ? JSON.parse(val) : undefined
+        },
+        set: async (key, val) => {
+          store.set(key, JSON.stringify(val))
+        },
+        delete: async (key) => {
+          store.delete(key)
+        }
+      }
+
+      const api = new API({ cache: persistentCache })
+
+      // Successful fetch
+      let res1 = await api.fetchAndCache('https://example.com/api/persistent')
+      assert(res1.count === 1)
+      assert(fetchCount === 1)
+
+      // Cached successful fetch
+      let res2 = await api.fetchAndCache('https://example.com/api/persistent')
+      assert(res2.count === 1)
+      assert(fetchCount === 1)
+
+      // Failed fetch
+      let errorThrown = false
+      try {
+        await api.fetchAndCache('https://example.com/api/fail-persistent')
+      } catch (e) {
+        errorThrown = true
+        assert(e.status === 500)
+        assert(e.message !== '')
+      }
+      assert(errorThrown === true)
+      assert(fetchCount === 2)
+
+      // Second call to failed (should retrieve from persistent cache, deserialize and throw error)
+      errorThrown = false
+      try {
+        await api.fetchAndCache('https://example.com/api/fail-persistent')
+      } catch (e) {
+        errorThrown = true
+        assert(e.status === 500)
+        assert(e.message !== '')
+      }
+      assert(errorThrown === true)
+      assert(fetchCount === 2)
+    }
+
   } finally {
     // Restore original fetch
     globalThis.fetch = originalFetch

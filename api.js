@@ -141,7 +141,7 @@ export class API {
     let p = (async () => {
       if (hasMethods) {
         let cached = await this.cache.get(key)
-        if (cached !== undefined && cached !== null) {
+        if (cached !== undefined) {
           return cached
         }
       } else {

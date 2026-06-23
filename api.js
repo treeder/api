@@ -9,7 +9,8 @@ export class API {
    */
   constructor(options = {}) {
     this.options = options
-    this.cache = {}
+    this.cache = options.cache || new Map()
+    this.inFlight = new Map()
   }
 
   /**
@@ -126,23 +127,72 @@ export class API {
     }
     let key = url
     // console.log('fetchAndCache', key)
-    if (Object.hasOwn(this.cache, key)) {
-      let r = await this.cache[key]
-      // console.log('in cache', key, r)
+
+    if (this.inFlight.has(key)) {
+      let r = await this.inFlight.get(key)
       if (r instanceof Error) {
         throw r
       }
       return r
     }
+
+    let p = (async () => {
+      let cached = await this.cache.get(key)
+      if (cached !== undefined && cached !== null) {
+        if (cached && typeof cached === 'object' && ('value' in cached || 'error' in cached)) {
+          if ('error' in cached) {
+            if (cached.expiresAt && Date.now() > cached.expiresAt) {
+              await this.cache.delete(key)
+              // fall through to fetch again
+            } else {
+              let errObj = cached.error
+              let e = new APIError(errObj.message, { status: errObj.status, data: errObj.data })
+              if (errObj.name) e.name = errObj.name
+              if (errObj.stack) e.stack = errObj.stack
+              throw e
+            }
+          } else {
+            return cached.value
+          }
+        } else if (cached instanceof Error) {
+          throw cached
+        } else {
+          return cached
+        }
+      }
+
+      let fetchPromise = this.fetch(url, options)
+
+      try {
+        let r = await fetchPromise
+        await this.cache.set(key, { value: r })
+        return r
+      } catch (e) {
+        let errorTTL = (options && options.errorTTL !== undefined) ? options.errorTTL : (this.options.errorTTL !== undefined ? this.options.errorTTL : 10)
+        if (errorTTL > 0) {
+          let errObj = {
+            message: e.message,
+            status: e.status,
+            data: e.data,
+            name: e.name,
+            stack: e.stack
+          }
+          await this.cache.set(key, { error: errObj, expiresAt: Date.now() + errorTTL * 1000 })
+        }
+        throw e
+      }
+    })()
+
+    this.inFlight.set(key, p)
+
     try {
-      let p = this.fetch(url, options)
-      this.cache[key] = p
       let r = await p
+      if (r instanceof Error) {
+        throw r
+      }
       return r
-    } catch (e) {
-      // also going to cache exceptions too. They should hopefully be APIError's
-      this.cache[key] = e
-      throw e
+    } finally {
+      this.inFlight.delete(key)
     }
   }
 }
@@ -160,6 +210,9 @@ let apiURL = defaultAPI.options.apiURL
 export function apiInit(options = {}) {
   defaultAPI.options = options
   apiURL = options.apiURL
+  if (options.cache) {
+    defaultAPI.cache = options.cache
+  }
 }
 
 export function getCookie(name) {
